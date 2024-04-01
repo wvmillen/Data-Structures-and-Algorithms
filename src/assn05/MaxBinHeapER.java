@@ -78,7 +78,7 @@ public class MaxBinHeapER  <V, P extends Comparable<P>> implements BinaryHeap<V,
             return;
         }
 
-        if (hasLeftChild(index) && (_heap.get(leftChildIndex).getPriority().compareTo(_heap.get(index).getPriority()) > 0))) {
+        if (hasLeftChild(index) && (hasLeftChild(index) && (_heap.get(leftChildIndex).getPriority().compareTo(_heap.get(index).getPriority()) > 0))) {
             largestChildIndex = leftChildIndex;
         }
         if (hasRightChild(index) && _heap.get(rightChildIndex).getPriority().compareTo(_heap.get(largestChildIndex).getPriority()) > 0) {
