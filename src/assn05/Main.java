@@ -7,6 +7,12 @@ public class Main {
         testP2();
 //        testP3();
         testP4();
+
+        double[] runtimes = compareRuntimes();
+        System.out.println("Total time for SimpleEmergencyRoom dequeue: " + runtimes[0] );
+        System.out.println("Average time for SimpleEmergencyRoom dequeue: " + runtimes[1] );
+        System.out.println("Total time for MaxBinHeapER dequeue: " + runtimes[2] );
+        System.out.println("Average time for MaxBinHeapER dequeue: " + runtimes[3] );
     }
 
     // test Part 1
@@ -68,16 +74,27 @@ public class Main {
         // Array which you will populate as part of Part 4
         double[] results = new double[4];
 
-        SimpleEmergencyRoom simplePQ = new SimpleEmergencyRoom();
-        fillER(simplePQ);
+        SimpleEmergencyRoom simpleER = new SimpleEmergencyRoom();
+        fillER(simpleER);
+        long startSimpleDequeue = System.nanoTime();
+        while (simpleER.size() > 0) {
+            simpleER.dequeue();
+        }
+        long endSimpleDequeue = System.nanoTime();
+        results[0] = (endSimpleDequeue - startSimpleDequeue);
+        results[1] = results[0] / 100000.0; // Average time per dequeue
 
-        // Code for (Task 4.1) Here
 
+        MaxBinHeapER complexER = new MaxBinHeapER();
+        fillER(complexER);
+        long startComplexDequeue = System.nanoTime();
+        while (complexER.size() > 0) {
+            complexER.dequeue();
+        }
+        long endComplexDequeue = System.nanoTime();
+        results[2] = (endComplexDequeue - startComplexDequeue);
+        results[3] = results[2] / 100000.0; // Average time per dequeue
 
-        MaxBinHeapER binHeap = new MaxBinHeapER();
-        fillER(binHeap);
-
-        // Code for (Task 4.2) Here
 
         return results;
     }

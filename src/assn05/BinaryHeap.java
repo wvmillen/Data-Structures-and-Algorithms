@@ -10,8 +10,10 @@ public interface BinaryHeap<V,P extends Comparable<P>> {
 
     /**
      * Create new hospital.Prioritized object and insert it into the heap
+     *
      * @param value
      * @param priority
+     * @return
      */
     void enqueue(V value, P priority);
 
