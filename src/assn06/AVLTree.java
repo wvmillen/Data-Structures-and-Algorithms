@@ -21,14 +21,13 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
      * AVLTree root for rotated result.
      */
      private AVLTree<T> rotateLeft() {
-
          if (this._right == null) {
              return this; // No rotation needed if right child is null.
          }
 
          AVLTree<T> newRoot = this._right; //new root is the right root
-         this._right = newRoot._left;
-         newRoot._left = this;
+         this._right = newRoot._left; //Child switch operation. If no child it will be null and still work
+         newRoot._left = this; //new left node was old root AKA Z node
 
          // Update heights
          this._height = Math.max(height(this._left), height(this._right)) + 1; //take max of left or right as the new height
@@ -39,19 +38,14 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
          newRoot._size = size(newRoot._left) + size(newRoot._right) + 1;
 
          return newRoot;
-
      }
 
-    /**
-     * Rotates the tree right and returns
-     * AVLTree root for rotated result.
-     */
      private AVLTree<T> rotateRight() {
          // You should implement right rotation and then use this
          // method as needed when fixing imbalances.
     	 // TODO
 
-         //same process as rotate left but with a right rotation this time
+         //Same process as rotate left but with a right rotation this time
          if (this._left == null) {
              return this; // No rotation needed if left child is null.
          }
@@ -69,7 +63,6 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
          newRoot._size = size(newRoot._left) + size(newRoot._right) + 1;
 
          return newRoot;
-
      }
 
     private int height(AVLTree<T> node) {
@@ -117,7 +110,7 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
             _right = (AVLTree<T>) _right.insert(element);
         }
 
-        // Update height and size
+        // Update height and size as usual
         _height = 1 + Math.max(height(_left), height(_right));
         _size = 1 + size(_left) + size(_right);
 
@@ -138,7 +131,7 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
 
         //Left Left and Right Right) handled in rotations
 
-        return this; // return thenode pointer
+        return this; // return the node pointer
     }
 
     private int getBalanceFactor() { //helper method to get the balance factor
@@ -150,11 +143,13 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
     	// TODO
         if (_value == null) {
             return this;
-        }    // Step 1: Search for the node to remove
-        int compareResult = element.compareTo(_value);
-        if (compareResult < 0) {
+        }
+
+        // Step 1: Search for the node to remove
+        int compareResult = element.compareTo(_value); //create variable for comparable to mak eit simplier to read
+        if (compareResult < 0) { //less than go left
             _left = (AVLTree<T>) _left.remove(element);
-        } else if (compareResult > 0) {
+        } else if (compareResult > 0) { // greater than go right
             _right = (AVLTree<T>) _right.remove(element);
         } else {
             // Step 2: Remove the node
@@ -165,19 +160,18 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
                 return (_left != null) ? _left : _right;
             }
         }
-
         return this; // Step 4: Return the new root
     }
 
-    }
+
 
     @Override
     public T findMin() {
         if (isEmpty()) {
             throw new RuntimeException("Illegal operation on empty tree");
         }
-        // TODO
-        AVLTree<T> current = this;
+       //TODO
+        AVLTree<T> current = this; //find left-most node
         while (current._left != null) {
             current = current._left;
         }
@@ -185,11 +179,11 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
     }
 
     @Override
-    public T findMax() {
+    public T findMax() { //find right-most node
         if (isEmpty()) {
             throw new RuntimeException("Illegal operation on empty tree");
         }
-        // TODO
+        //TODO
         AVLTree<T> current = this;
         while (current._right != null) {
             current = current._right;
@@ -203,14 +197,14 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
         if (this._value == null)
             return false;  // Empty tree
 
-        int comparison = value.compareTo(this._value);
+        int comparison = element.compareTo(this._value);
         if (comparison == 0)
             return true;  // Found the value
-        else if (comparison < 0)
-            return this._left != null && this._left.contains(value);  // Search in the left subtree
+        else if (comparison < 0) //binary search
+            return this._left != null && this._left.contains(element);  // Search in the left subtree
         else
-            return this._right != null && this._right.contains(value);  // Search in the right subtree
-    }
+            return this._right != null && this._right.contains(element);  // Search in the right subtree
+        }
 
 
 
@@ -218,17 +212,17 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
     public boolean rangeContain(T start, T end) {
         // TODO
         if (this._value == null)
-            return min.compareTo(max) > 0;  // Return true if the range is invalid (min > max)
+            return start.compareTo(end) > 0;  // Return true if the range is invalid (min > max)
 
-        if (this._value.compareTo(min) < 0)
-            return this._right != null && this._right.rangeContain(min, max);  // Check in right subtree if current value is less than min
+        if (this._value.compareTo(start) < 0)
+            return this._right != null && this._right.rangeContain(start, end);  // Check in right subtree if current value is less than min
 
-        if (this._value.compareTo(max) > 0)
-            return this._left != null && this._left.rangeContain(min, max);  // Check in left subtree if current value is greater than max
+        if (this._value.compareTo(end) > 0)
+            return this._left != null && this._left.rangeContain(start, end);  // Check in left subtree if current value is greater than max
 
-        // If current value is within range, check both subtrees
-        boolean leftCheck = this._left == null || this._left.rangeContain(min, this._value);
-        boolean rightCheck = this._right == null || this._right.rangeContain(this._value, max);
+        // If current value is within range then check both subtrees
+        boolean leftCheck = this._left == null || this._left.rangeContain(start, this._value);
+        boolean rightCheck = this._right == null || this._right.rangeContain(this._value, end);
         return leftCheck && rightCheck;
     }
 
