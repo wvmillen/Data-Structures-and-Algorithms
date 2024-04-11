@@ -20,49 +20,41 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
      * Rotates the tree left and returns
      * AVLTree root for rotated result.
      */
-     private AVLTree<T> rotateLeft() {
-         if (this._right == null) {
-             return this; // No rotation needed if right child is null.
+     private AVLTree<T> rotateLeft(AVLTree<T> node) {
+         if (node == null || node._right == null){
+             return node;  // No rotation needed
          }
 
-         AVLTree<T> newRoot = this._right; //new root is the right root
-         this._right = newRoot._left; //Child switch operation. If no child it will be null and still work
-         newRoot._left = this; //new left node was old root AKA Z node
+         //preform rotation
+         AVLTree<T> rightChild = node._right;
+         node._right = rightChild._left; //switch right child's left child to the other side
+         rightChild._left = node;
 
-         // Update heights
-         this._height = Math.max(height(this._left), height(this._right)) + 1; //take max of left or right as the new height
-         newRoot._height = Math.max(height(newRoot._left), height(newRoot._right)) + 1;
+         // Update heights and sizes after rotation
+         node._height = Math.max(height(node._left), height(node._right)) + 1;
+         node._size = size(node._left) + size(node._right) + 1;
+         rightChild._height = Math.max(height(rightChild._left), height(rightChild._right)) + 1;
+         rightChild._size = size(rightChild._left) + size(rightChild._right) + 1;
 
-         // Update sizes if necessary
-         this._size = size(this._left) + size(this._right) + 1;
-         newRoot._size = size(newRoot._left) + size(newRoot._right) + 1;
-
-         return newRoot;
+         return rightChild;  // The new root after rotation
      }
 
-     private AVLTree<T> rotateRight() {
-         // You should implement right rotation and then use this
-         // method as needed when fixing imbalances.
-    	 // TODO
+     private AVLTree<T> rotateRight(AVLTree<T> node) {
 
-         //Same process as rotate left but with a right rotation this time
-         if (this._left == null) {
-             return this; // No rotation needed if left child is null.
-         }
+         //preform same operation as rotateLeft except on the right
+         if (node == null || node._left == null) return node;  // No rotation needed
 
-         AVLTree<T> newRoot = this._left;
-         this._left = newRoot._right;
-         newRoot._right = this;
+         AVLTree<T> leftChild = node._left;
+         node._left = leftChild._right;
+         leftChild._right = node;
 
-         // Update heights
-         this._height = Math.max(height(this._left), height(this._right)) + 1;
-         newRoot._height = Math.max(height(newRoot._left), height(newRoot._right)) + 1;
+         // Update heights and sizes after rotation
+         node._height = Math.max(height(node._left), height(node._right)) + 1;
+         node._size = size(node._left) + size(node._right) + 1;
+         leftChild._height = Math.max(height(leftChild._left), height(leftChild._right)) + 1;
+         leftChild._size = size(leftChild._left) + size(leftChild._right) + 1;
 
-         // Update sizes
-         this._size = size(this._left) + size(this._right) + 1;
-         newRoot._size = size(newRoot._left) + size(newRoot._right) + 1;
-
-         return newRoot;
+         return leftChild;  // The new root after rotation
      }
 
     private int height(AVLTree<T> node) {
@@ -90,77 +82,71 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
     }
 
     @Override
-    public SelfBalancingBST<T> insert(T element) {
-    	// TODO
-        // Base case: insert new node
+    public SelfBalancingBST<T> insert(T value) {
+        if (value == null) return this; // Ignore null values
+
+        // Standard BST insert
         if (_value == null) {
-            _value = element;
+            _value = value;
             _height = 0;
             _size = 1;
-            return this;
-        }
-
-        //insert recursivly
-        if (element.compareTo(_value) < 0) {
+        } else if (value.compareTo(_value) < 0) {
             if (_left == null) _left = new AVLTree<>();
-            _left = (AVLTree<T>) _left.insert(element);
-
-        } else if (element.compareTo(_value) > 0) {
+            _left = (AVLTree<T>) _left.insert(value);
+        } else if (value.compareTo(_value) > 0) {
             if (_right == null) _right = new AVLTree<>();
-            _right = (AVLTree<T>) _right.insert(element);
+            _right = (AVLTree<T>) _right.insert(value);
         }
 
-        // Update height and size as usual
-        _height = 1 + Math.max(height(_left), height(_right));
-        _size = 1 + size(_left) + size(_right);
+        // Update height and size of this node
+        _height = Math.max(height(_left), height(_right)) + 1;
+        _size = size(_left) + size(_right) + 1;
 
-        // Get balance factor to check for imbalance
-        int balance = getBalanceFactor();
+        // Check balance and apply rotations
+        int balance = balanceFactor();
 
-        // Left-Right Imbalance - Left Rotation then Right Rotation
-        if (balance > 1 && element.compareTo(_left._value) > 0) {
-            _left = _left.rotateLeft();
-            return rotateRight();
+        // Left Left Case
+        if (balance > 1 && value.compareTo(_left._value) < 0) {
+            return rotateRight(this);
         }
 
-        // Right-Left Imbalance - Right Rotation then Left Rotation
-        if (balance < -1 && element.compareTo(_right._value) < 0) {
-            _right = _right.rotateRight();
-            return rotateLeft();
+        // Right Right Case
+        if (balance < -1 && value.compareTo(_right._value) > 0) {
+            return rotateLeft(this);
         }
 
-        //Left Left and Right Right) handled in rotations
+        // Left Right Case
+        if (balance > 1 && value.compareTo(_left._value) > 0) {
+            if (_left != null) {
+                _left = _left.rotateLeft(_left);
+            } else {
+                _left = null;
+            }
+            return rotateRight(this);
+        }
 
-        return this; // return the node pointer
+        // Right Left Case
+        if (balance < -1 && value.compareTo(_right._value) < 0) {
+            if (_right != null) {
+                _right = _right.rotateRight(_right);
+            } else {
+                _right = null;
+            }
+            return rotateLeft(this);
+        }
+
+        return this; // return the node itself if no rotations are needed
     }
 
-    private int getBalanceFactor() { //helper method to get the balance factor
+    private int balanceFactor() { //helper method to get the balance factor
         return height(_left) - height(_right);
     }
 
     @Override
     public SelfBalancingBST<T> remove(T element) {
     	// TODO
-        if (_value == null) {
-            return this;
-        }
 
-        // Step 1: Search for the node to remove
-        int compareResult = element.compareTo(_value); //create variable for comparable to mak eit simplier to read
-        if (compareResult < 0) { //less than go left
-            _left = (AVLTree<T>) _left.remove(element);
-        } else if (compareResult > 0) { // greater than go right
-            _right = (AVLTree<T>) _right.remove(element);
-        } else {
-            // Step 2: Remove the node
-            if (_left != null && _right != null) {
-                _value = _right.findMin();
-                _right = (AVLTree<T>) _right.remove(_value);
-            } else {
-                return (_left != null) ? _left : _right;
-            }
-        }
-        return this; // Step 4: Return the new root
+        return null;
     }
 
 
