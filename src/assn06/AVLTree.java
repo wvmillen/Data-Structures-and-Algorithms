@@ -1,7 +1,5 @@
 package assn06;
 
-import assn04.EmptyBST;
-
 public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
     // Fields
     private T _value;
@@ -131,6 +129,9 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
     @Override
     public SelfBalancingBST<T> remove(T element) {
     	// TODO
+        if(_value == null){ //case for null
+            return this;
+        }
         //This is my remove function from my bst code for assigment 4 modifyed for AVL Trees. If it works there, it will work here
         if (element.compareTo(_value) == 0) {  //If we find our element
 
@@ -149,7 +150,7 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
             }
         } else if (element.compareTo(_value) < 0) { //Go to the left
             _left = (AVLTree<T>) this.getLeft().remove(element); //rerun through thr program moving to the left
-        } else { //go to the right
+        } else if(element.compareTo(_value) > 0){ //go to the right
             _right = (AVLTree<T>) this.getRight().remove(element); //rerun through thr program moving to the right
         }
         //adjust the height and size variables as usual
@@ -169,7 +170,7 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
         }
        //TODO
         AVLTree<T> current = this; //find left-most node
-        while (current._left != null) {
+        while (!current._left.isEmpty()) {
             current = current._left;
         }
         return current._value;
@@ -182,7 +183,7 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
         }
         //TODO
         AVLTree<T> current = this;
-        while (current._right != null) {
+        while (!current._right.isEmpty()) {
             current = current._right;
         }
         return current._value;
@@ -198,9 +199,9 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
         if (comparison == 0)
             return true;  // Found the value
         else if (comparison < 0) //binary search
-            return this._left != null && this._left.contains(element);  // Search in the left subtree
+            return _left.contains(element);  // Search in the left subtree
         else
-            return this._right != null && this._right.contains(element);  // Search in the right subtree
+            return _right.contains(element);  // Search in the right subtree
         }
 
 
@@ -208,19 +209,19 @@ public class AVLTree<T extends Comparable<T>> implements SelfBalancingBST<T> {
     @Override
     public boolean rangeContain(T start, T end) {
         // TODO
-        if (this._value == null)
-            return start.compareTo(end) > 0;  // Return true if the range is invalid (min > max)
+        if (this._value == null) {
+            return false;
+        }
 
-        if (this._value.compareTo(start) < 0)
-            return this._right != null && this._right.rangeContain(start, end);  // Check in right subtree if current value is less than min
+        if (start.compareTo(this._value) <= 0 && end.compareTo(this._value) >= 0) {
+            return true;
+        }
 
-        if (this._value.compareTo(end) > 0)
-            return this._left != null && this._left.rangeContain(start, end);  // Check in left subtree if current value is greater than max
+        if (start.compareTo(this._value) > 0) {
+            return this._right.rangeContain(start, end);
+        }
 
-        // If current value is within range then check both subtrees
-        boolean leftCheck = this._left == null || this._left.rangeContain(start, this._value);
-        boolean rightCheck = this._right == null || this._right.rangeContain(this._value, end);
-        return leftCheck && rightCheck;
+        return this._left.rangeContain(start, end);
     }
 
     @Override
