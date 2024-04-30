@@ -10,8 +10,10 @@ public interface Map <K, V> {
      * and inserts the object at the appropriate index
      * based on the hash of they key. If the key already
      * exists in map, update its value.
-     * @param key: the website name
+     *
+     * @param key:   the website name
      * @param value: the password
+     * @return
      */
     void put(K key, V value);
 
